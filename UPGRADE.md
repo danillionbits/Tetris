@@ -7,6 +7,39 @@ correctness bugs found in the code review.
 
 ---
 
+## Where this stands (2026-10-02)
+
+**All six phases are done, committed to `master`, and deployed.**
+Live at <https://danillionbits.github.io/Tetris/>.
+
+Nothing is half-finished. If you are picking this up cold, read Phase 3b
+before touching `usePlayer` — it explains the invariant the whole input layer
+now rests on, and it is easy to undo by accident.
+
+- **Run it:** `npm run dev` (5173) · `npm run build` · `npm run preview`
+- **Deploy:** automatic. `.github/workflows/deploy.yml` builds and publishes
+  `build/` to GitHub Pages on every push to `master`. No manual step.
+- **Verifying a deploy:** GitHub Pages serves `index.html` with roughly a
+  10-minute cache, so a browser that has been on the site recently keeps
+  running the previous bundle. Compare the hashed filename in the page against
+  `build/index.html`, and load `/?cachebust=<n>` to force the current one. The
+  hashed asset names mean you never get a broken mix of old and new.
+- **Pushing:** the repo is `danillionbits/Tetris`, and the account the `gh` CLI
+  has active (`danillionP`) only has read access. Pushes need
+  `gh auth switch -u danillionbits` first; switch back afterwards.
+
+**The invariant to preserve.** Every action on the falling piece decides *and*
+applies inside its `setPlayer` updater, against `prev`, and carries the `id` of
+the piece it was decided for. Checking something against the render's `player`
+and then applying it through a functional update reads two different versions
+of state, and everything in Phase 3b lived in that gap. Any new action — hold,
+pause, a second rotation direction — has to follow the same shape.
+
+**What is deliberately not here:** see *Not in scope* at the bottom. The list
+is shorter than it was; the ghost piece moved out of it in Phase 6.
+
+---
+
 ## Phase 0 — Baseline ✅
 
 - [x] Clone repo, read all 20 source files (591 LOC)
