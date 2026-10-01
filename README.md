@@ -2,6 +2,8 @@
 
 Tetris, built with React.
 
+**Play it: https://danillionbits.github.io/Tetris/**
+
 Originally written in 2019 on Create React App and React 16. Revived in 2026 on
 Vite and React 19 — see [UPGRADE.md](UPGRADE.md) for what changed and why.
 
@@ -22,6 +24,8 @@ npm run preview  # serve the built bundle
 | ↑ | Rotate |
 | ↓ | Soft drop (hold) |
 | C / Space | Hard drop |
+
+Keyboard only — there are no touch controls yet, so it needs a real keyboard.
 
 Click **Start Game** to play. Clearing lines scores Nintendo-style points
 (40 / 100 / 300 / 1200 for 1–4 rows), multiplied by the current level; every
