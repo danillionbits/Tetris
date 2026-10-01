@@ -20,10 +20,12 @@ export const checkCollision = (player, stage, { x: moveX, y: moveY }) => {
 			const nextX = x + player.pos.x + moveX;
 
 			// Off the board (floor or side), or into a cell that is locked.
+			// Only 'merged' blocks: the piece in play is itself painted into
+			// the stage, as is its landing preview, and neither is a wall.
 			if (
 				!stage[nextY] ||
 				!stage[nextY][nextX] ||
-				stage[nextY][nextX][1] !== 'clear'
+				stage[nextY][nextX][1] === 'merged'
 			) {
 				return true;
 			}
@@ -31,4 +33,19 @@ export const checkCollision = (player, stage, { x: moveX, y: moveY }) => {
 	}
 
 	return false;
+}
+
+// How far the piece can fall before it lands. Used both by the hard drop and
+// by the landing preview, so the preview is drawn exactly where a hard drop
+// would put the piece.
+export const dropDistance = (player, stage) => {
+	let moveY = 0;
+
+	// The bound is a backstop: an empty tetromino never collides, and an
+	// unbounded loop here freezes the tab rather than failing.
+	while (moveY <= STAGE_HEIGHT && !checkCollision(player, stage, { x: 0, y: moveY + 1 })) {
+		moveY += 1;
+	}
+
+	return moveY;
 }

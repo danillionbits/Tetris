@@ -121,10 +121,31 @@ level 1 scores 200, so the level multiplier reaches the score. A 30-piece
 random game ended in a genuine top-out with the stack intact. Console is clean
 on load under StrictMode — no React or styled-components warnings.
 
+## Phase 6 — Landing preview (ghost piece) ✅
+
+An outline of the falling piece, drawn where it would come to rest, so you can
+line a piece up without counting columns.
+
+- [x] `dropDistance` in `gameHelpers`, shared by the preview and the hard drop,
+      so the piece always lands exactly where the preview said it would
+- [x] `useStage` paints the preview as a third cell status, `'ghost'`, before
+      painting the piece itself -- the piece wins where they overlap
+- [x] `StyledCell` renders a `'ghost'` cell as a faint outline in the piece's
+      own colour instead of a solid bevelled block
+
+Two existing assumptions had to move for this. `checkCollision` treated *any*
+non-`'clear'` cell as solid, so a third status would have read as a wall and
+frozen the piece in place; it now blocks only on `'merged'`, which is what it
+always meant. And the per-frame flush kept every non-`'clear'` cell, which
+would have left a trail of stale previews; it now keeps only `'merged'`.
+`sweepRows` likewise tests for a row of `'merged'` cells rather than a row with
+no empty values, so a preview lying across a row can never be mistaken for a
+completed line.
+
 ---
 
 ## Not in scope (future)
 
 Gameplay *features*, as opposed to fixes — deliberately deferred:
-next-piece preview · ghost piece · hold · pause · SRS wall kicks ·
+next-piece preview · hold · pause · SRS wall kicks ·
 `localStorage` high score · touch controls / responsive layout · sound · tests · CI

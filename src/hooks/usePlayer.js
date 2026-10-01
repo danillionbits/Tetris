@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 
 import { TETROMINOS, randomTetromino } from '../tetrominos';
-import { STAGE_WIDTH, STAGE_HEIGHT, checkCollision } from '../gameHelpers';
+import { STAGE_WIDTH, checkCollision, dropDistance } from '../gameHelpers';
 
 const rotate = (matrix, dir) => {
 	// Transpose: rows become columns. `map` builds new rows, so the piece we
@@ -59,12 +59,9 @@ export const usePlayer = () => {
 		setPlayer(prev => {
 			if (isStale(prev)) return prev;
 
-			let moveY = 0;
-			// The bound is a backstop: an empty tetromino never collides, and
-			// an unbounded loop here freezes the tab rather than failing.
-			while (moveY <= STAGE_HEIGHT && !checkCollision(prev, stage, { x: 0, y: moveY + 1 })) {
-				moveY += 1;
-			}
+			// The same distance the landing preview is drawn at, so the piece
+			// lands exactly where the preview said it would.
+			const moveY = dropDistance(prev, stage);
 
 			return {
 				...prev,

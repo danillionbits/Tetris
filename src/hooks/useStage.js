@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { createStage, createRow } from '../gameHelpers';
+import { createStage, createRow, dropDistance } from '../gameHelpers';
 
 // Remove every full row, dropping the rows above down into the gap.
 // Pure: returns the swept stage and the number of rows removed.
@@ -7,7 +7,7 @@ const sweepRows = stage => {
 	let cleared = 0;
 
 	const swept = stage.reduce((acc, row) => {
-		if (row.findIndex(cell => cell[0] === 0) === -1) {
+		if (row.every(cell => cell[1] === 'merged')) {
 			cleared += 1;
 			acc.unshift(createRow(row.length));
 			return acc;
@@ -17,6 +17,28 @@ const sweepRows = stage => {
 	}, []);
 
 	return [ swept, cleared ];
+}
+
+// Paint a tetromino into a stage that is still being built. `status` tags the
+// cells: 'merged' for a piece that has locked, 'ghost' for the landing
+// preview, 'clear' for the piece in play -- that one has to stay 'clear', or
+// the piece would collide with itself.
+const draw = (stage, { tetromino, pos }, status, offsetY = 0) => {
+	tetromino.forEach((row, y) => {
+		row.forEach((value, x) => {
+			if (value === 0) return;
+
+			const stageY = y + pos.y + offsetY;
+			const stageX = x + pos.x;
+
+			// A topped-out piece can overhang the board. Never write out of
+			// bounds, and never overwrite a cell that is already locked.
+			if (!stage[stageY] || !stage[stageY][stageX]) return;
+			if (stage[stageY][stageX][1] === 'merged') return;
+
+			stage[stageY][stageX] = [ value, status ];
+		})
+	})
 }
 
 export const useStage = (player, resetPlayer) => {
@@ -34,33 +56,24 @@ export const useStage = (player, resetPlayer) => {
 	}, []);
 
 	useEffect(() => {
-		// Flush: clear everything that isn't locked in place, then redraw.
+		// Flush: keep the locked cells and clear the rest. The piece in play and
+		// last frame's preview are both redrawn from scratch every time.
 		const newStage = stageRef.current.map(row =>
-			row.map(cell => (cell[1] === 'clear' ? [0, 'clear'] : cell))
+			row.map(cell => (cell[1] === 'merged' ? cell : [0, 'clear']))
 		);
 
-		// Draw the active tetromino.
-		player.tetromino.forEach((row, y) => {
-			row.forEach((value, x) => {
-				if (value === 0) return;
-
-				const stageY = y + player.pos.y;
-				const stageX = x + player.pos.x;
-
-				// A topped-out piece can overhang the board. Never write out of
-				// bounds, and never overwrite a cell that is already locked.
-				if (!newStage[stageY] || !newStage[stageY][stageX]) return;
-				if (newStage[stageY][stageX][1] === 'merged') return;
-
-				newStage[stageY][stageX] = [ value, player.collided ? 'merged' : 'clear' ];
-			})
-		})
-
 		if (!player.collided) {
+			// The preview is drawn first so the piece paints over it where the
+			// two overlap -- near the floor they are the same cells.
+			draw(newStage, player, 'ghost', dropDistance(player, newStage));
+			draw(newStage, player, 'clear');
+
 			setRowsCleared(0);
 			replaceStage(newStage);
 			return;
 		}
+
+		draw(newStage, player, 'merged');
 
 		const [ sweptStage, cleared ] = sweepRows(newStage);
 		setRowsCleared(cleared);

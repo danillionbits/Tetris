@@ -25,6 +25,9 @@ npm run preview  # serve the built bundle
 | ↓ | Soft drop (hold) |
 | C / Space | Hard drop |
 
+An outline of the falling piece shows where it will land, so you can line it up
+without counting columns.
+
 Keyboard only — there are no touch controls yet, so it needs a real keyboard.
 
 Click **Start Game** to play. Clearing lines scores Nintendo-style points

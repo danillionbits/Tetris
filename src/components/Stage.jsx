@@ -7,7 +7,12 @@ const Stage = ({ stage }) => (
       row.map((cell, x) => (
         // Every cell is a sibling in one flat grid, so the key has to be unique
         // across the whole board, not just within its row.
-        <Cell key={`${y}-${x}`} type={cell[0]} colorValue={(x + y) % 2} />
+        <Cell
+          key={`${y}-${x}`}
+          type={cell[0]}
+          status={cell[1]}
+          colorValue={(x + y) % 2}
+        />
       ))
     )}
   </StyledStage>
