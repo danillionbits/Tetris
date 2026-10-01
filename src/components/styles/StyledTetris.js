@@ -5,6 +5,9 @@ export const StyledTetrisWrapper = styled.div`
   height: 100vh;
   background-image: linear-gradient(#0083B0, #00B4DB);
   overflow: hidden;
+  /* The wrapper is focused on load so it can receive keys; the focus ring
+     would otherwise outline the entire viewport. */
+  outline: none;
 `;
 
 export const StyledTetris = styled.div`
